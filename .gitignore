@@ -1,0 +1,14 @@
+# Medii virtuale si cache
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Date descarcate si generate (nu le urcam in repo)
+data/raw/*
+!data/raw/.gitkeep
+data/processed/
+chroma/
+
+# Secrete
+.env

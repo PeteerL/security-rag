@@ -1,0 +1,303 @@
+# Lista documentelor din corpus (versiunea 1).
+# Fiecare intrare: id unic, titlu, URL oficial, tip (markdown/pdf/csv) si rol.
+#   rol = rag    -> intra in baza vectoriala (cautare semantica)
+#   rol = lookup -> date structurate pentru cautare dupa ID (nu intra in RAG)
+
+sources:
+  # --- OWASP Cheat Sheet Series (sfaturi practice pentru dezvoltatori) ---
+  - id: owasp-cs-authentication
+    title: "OWASP Authentication Cheat Sheet"
+    url: https://raw.githubusercontent.com/OWASP/CheatSheetSeries/master/cheatsheets/Authentication_Cheat_Sheet.md
+    type: markdown
+    collection: owasp-cheatsheets
+    role: rag
+  - id: owasp-cs-password-storage
+    title: "OWASP Password Storage Cheat Sheet"
+    url: https://raw.githubusercontent.com/OWASP/CheatSheetSeries/master/cheatsheets/Password_Storage_Cheat_Sheet.md
+    type: markdown
+    collection: owasp-cheatsheets
+    role: rag
+  - id: owasp-cs-session-management
+    title: "OWASP Session Management Cheat Sheet"
+    url: https://raw.githubusercontent.com/OWASP/CheatSheetSeries/master/cheatsheets/Session_Management_Cheat_Sheet.md
+    type: markdown
+    collection: owasp-cheatsheets
+    role: rag
+  - id: owasp-cs-json-web-token
+    title: "OWASP JSON Web Token Cheat Sheet"
+    url: https://raw.githubusercontent.com/OWASP/CheatSheetSeries/master/cheatsheets/JSON_Web_Token_Cheat_Sheet.md
+    type: markdown
+    collection: owasp-cheatsheets
+    role: rag
+  - id: owasp-cs-authorization
+    title: "OWASP Authorization Cheat Sheet"
+    url: https://raw.githubusercontent.com/OWASP/CheatSheetSeries/master/cheatsheets/Authorization_Cheat_Sheet.md
+    type: markdown
+    collection: owasp-cheatsheets
+    role: rag
+  - id: owasp-cs-multifactor-authentication
+    title: "OWASP Multifactor Authentication Cheat Sheet"
+    url: https://raw.githubusercontent.com/OWASP/CheatSheetSeries/master/cheatsheets/Multifactor_Authentication_Cheat_Sheet.md
+    type: markdown
+    collection: owasp-cheatsheets
+    role: rag
+  - id: owasp-cs-forgot-password
+    title: "OWASP Forgot Password Cheat Sheet"
+    url: https://raw.githubusercontent.com/OWASP/CheatSheetSeries/master/cheatsheets/Forgot_Password_Cheat_Sheet.md
+    type: markdown
+    collection: owasp-cheatsheets
+    role: rag
+  - id: owasp-cs-input-validation
+    title: "OWASP Input Validation Cheat Sheet"
+    url: https://raw.githubusercontent.com/OWASP/CheatSheetSeries/master/cheatsheets/Input_Validation_Cheat_Sheet.md
+    type: markdown
+    collection: owasp-cheatsheets
+    role: rag
+  - id: owasp-cs-sql-injection-prevention
+    title: "OWASP SQL Injection Prevention Cheat Sheet"
+    url: https://raw.githubusercontent.com/OWASP/CheatSheetSeries/master/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.md
+    type: markdown
+    collection: owasp-cheatsheets
+    role: rag
+  - id: owasp-cs-cross-site-scripting-prevention
+    title: "OWASP Cross Site Scripting Prevention Cheat Sheet"
+    url: https://raw.githubusercontent.com/OWASP/CheatSheetSeries/master/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.md
+    type: markdown
+    collection: owasp-cheatsheets
+    role: rag
+  - id: owasp-cs-cross-site-request-forgery-prevention
+    title: "OWASP Cross-Site Request Forgery Prevention Cheat Sheet"
+    url: https://raw.githubusercontent.com/OWASP/CheatSheetSeries/master/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.md
+    type: markdown
+    collection: owasp-cheatsheets
+    role: rag
+  - id: owasp-cs-rest-security
+    title: "OWASP REST Security Cheat Sheet"
+    url: https://raw.githubusercontent.com/OWASP/CheatSheetSeries/master/cheatsheets/REST_Security_Cheat_Sheet.md
+    type: markdown
+    collection: owasp-cheatsheets
+    role: rag
+  - id: owasp-cs-graphql
+    title: "OWASP GraphQL Cheat Sheet"
+    url: https://raw.githubusercontent.com/OWASP/CheatSheetSeries/master/cheatsheets/GraphQL_Cheat_Sheet.md
+    type: markdown
+    collection: owasp-cheatsheets
+    role: rag
+  - id: owasp-cs-file-upload
+    title: "OWASP File Upload Cheat Sheet"
+    url: https://raw.githubusercontent.com/OWASP/CheatSheetSeries/master/cheatsheets/File_Upload_Cheat_Sheet.md
+    type: markdown
+    collection: owasp-cheatsheets
+    role: rag
+  - id: owasp-cs-logging
+    title: "OWASP Logging Cheat Sheet"
+    url: https://raw.githubusercontent.com/OWASP/CheatSheetSeries/master/cheatsheets/Logging_Cheat_Sheet.md
+    type: markdown
+    collection: owasp-cheatsheets
+    role: rag
+  - id: owasp-cs-error-handling
+    title: "OWASP Error Handling Cheat Sheet"
+    url: https://raw.githubusercontent.com/OWASP/CheatSheetSeries/master/cheatsheets/Error_Handling_Cheat_Sheet.md
+    type: markdown
+    collection: owasp-cheatsheets
+    role: rag
+  - id: owasp-cs-secrets-management
+    title: "OWASP Secrets Management Cheat Sheet"
+    url: https://raw.githubusercontent.com/OWASP/CheatSheetSeries/master/cheatsheets/Secrets_Management_Cheat_Sheet.md
+    type: markdown
+    collection: owasp-cheatsheets
+    role: rag
+  - id: owasp-cs-cryptographic-storage
+    title: "OWASP Cryptographic Storage Cheat Sheet"
+    url: https://raw.githubusercontent.com/OWASP/CheatSheetSeries/master/cheatsheets/Cryptographic_Storage_Cheat_Sheet.md
+    type: markdown
+    collection: owasp-cheatsheets
+    role: rag
+  - id: owasp-cs-dotnet-security
+    title: "OWASP DotNet Security Cheat Sheet"
+    url: https://raw.githubusercontent.com/OWASP/CheatSheetSeries/master/cheatsheets/DotNet_Security_Cheat_Sheet.md
+    type: markdown
+    collection: owasp-cheatsheets
+    role: rag
+  - id: owasp-cs-docker-security
+    title: "OWASP Docker Security Cheat Sheet"
+    url: https://raw.githubusercontent.com/OWASP/CheatSheetSeries/master/cheatsheets/Docker_Security_Cheat_Sheet.md
+    type: markdown
+    collection: owasp-cheatsheets
+    role: rag
+
+  # --- OWASP Top 10:2025 (doar cele 10 categorii) ---
+  - id: owasp-top10-a01
+    title: "OWASP Top 10:2025 Broken Access Control (A01)"
+    url: https://raw.githubusercontent.com/OWASP/Top10/master/2025/docs/en/A01_2025-Broken_Access_Control.md
+    type: markdown
+    collection: owasp-top10-2025
+    role: rag
+  - id: owasp-top10-a02
+    title: "OWASP Top 10:2025 Security Misconfiguration (A02)"
+    url: https://raw.githubusercontent.com/OWASP/Top10/master/2025/docs/en/A02_2025-Security_Misconfiguration.md
+    type: markdown
+    collection: owasp-top10-2025
+    role: rag
+  - id: owasp-top10-a03
+    title: "OWASP Top 10:2025 Software Supply Chain Failures (A03)"
+    url: https://raw.githubusercontent.com/OWASP/Top10/master/2025/docs/en/A03_2025-Software_Supply_Chain_Failures.md
+    type: markdown
+    collection: owasp-top10-2025
+    role: rag
+  - id: owasp-top10-a04
+    title: "OWASP Top 10:2025 Cryptographic Failures (A04)"
+    url: https://raw.githubusercontent.com/OWASP/Top10/master/2025/docs/en/A04_2025-Cryptographic_Failures.md
+    type: markdown
+    collection: owasp-top10-2025
+    role: rag
+  - id: owasp-top10-a05
+    title: "OWASP Top 10:2025 Injection (A05)"
+    url: https://raw.githubusercontent.com/OWASP/Top10/master/2025/docs/en/A05_2025-Injection.md
+    type: markdown
+    collection: owasp-top10-2025
+    role: rag
+  - id: owasp-top10-a06
+    title: "OWASP Top 10:2025 Insecure Design (A06)"
+    url: https://raw.githubusercontent.com/OWASP/Top10/master/2025/docs/en/A06_2025-Insecure_Design.md
+    type: markdown
+    collection: owasp-top10-2025
+    role: rag
+  - id: owasp-top10-a07
+    title: "OWASP Top 10:2025 Authentication Failures (A07)"
+    url: https://raw.githubusercontent.com/OWASP/Top10/master/2025/docs/en/A07_2025-Authentication_Failures.md
+    type: markdown
+    collection: owasp-top10-2025
+    role: rag
+  - id: owasp-top10-a08
+    title: "OWASP Top 10:2025 Software or Data Integrity Failures (A08)"
+    url: https://raw.githubusercontent.com/OWASP/Top10/master/2025/docs/en/A08_2025-Software_or_Data_Integrity_Failures.md
+    type: markdown
+    collection: owasp-top10-2025
+    role: rag
+  - id: owasp-top10-a09
+    title: "OWASP Top 10:2025 Security Logging and Alerting Failures (A09)"
+    url: https://raw.githubusercontent.com/OWASP/Top10/master/2025/docs/en/A09_2025-Security_Logging_and_Alerting_Failures.md
+    type: markdown
+    collection: owasp-top10-2025
+    role: rag
+  - id: owasp-top10-a10
+    title: "OWASP Top 10:2025 Mishandling of Exceptional Conditions (A10)"
+    url: https://raw.githubusercontent.com/OWASP/Top10/master/2025/docs/en/A10_2025-Mishandling_of_Exceptional_Conditions.md
+    type: markdown
+    collection: owasp-top10-2025
+    role: rag
+
+  # --- OWASP ASVS 5.0 (capitolele V1-V16; V17 WebRTC e in afara temei) ---
+  - id: owasp-asvs-v1
+    title: "OWASP ASVS 5.0 V1 Encoding and Sanitization"
+    url: https://raw.githubusercontent.com/OWASP/ASVS/master/5.0/en/0x10-V1-Encoding-and-Sanitization.md
+    type: markdown
+    collection: owasp-asvs-5.0
+    role: rag
+  - id: owasp-asvs-v2
+    title: "OWASP ASVS 5.0 V2 Validation and Business Logic"
+    url: https://raw.githubusercontent.com/OWASP/ASVS/master/5.0/en/0x11-V2-Validation-and-Business-Logic.md
+    type: markdown
+    collection: owasp-asvs-5.0
+    role: rag
+  - id: owasp-asvs-v3
+    title: "OWASP ASVS 5.0 V3 Web Frontend Security"
+    url: https://raw.githubusercontent.com/OWASP/ASVS/master/5.0/en/0x12-V3-Web-Frontend-Security.md
+    type: markdown
+    collection: owasp-asvs-5.0
+    role: rag
+  - id: owasp-asvs-v4
+    title: "OWASP ASVS 5.0 V4 API and Web Service"
+    url: https://raw.githubusercontent.com/OWASP/ASVS/master/5.0/en/0x13-V4-API-and-Web-Service.md
+    type: markdown
+    collection: owasp-asvs-5.0
+    role: rag
+  - id: owasp-asvs-v5
+    title: "OWASP ASVS 5.0 V5 File Handling"
+    url: https://raw.githubusercontent.com/OWASP/ASVS/master/5.0/en/0x14-V5-File-Handling.md
+    type: markdown
+    collection: owasp-asvs-5.0
+    role: rag
+  - id: owasp-asvs-v6
+    title: "OWASP ASVS 5.0 V6 Authentication"
+    url: https://raw.githubusercontent.com/OWASP/ASVS/master/5.0/en/0x15-V6-Authentication.md
+    type: markdown
+    collection: owasp-asvs-5.0
+    role: rag
+  - id: owasp-asvs-v7
+    title: "OWASP ASVS 5.0 V7 Session Management"
+    url: https://raw.githubusercontent.com/OWASP/ASVS/master/5.0/en/0x16-V7-Session-Management.md
+    type: markdown
+    collection: owasp-asvs-5.0
+    role: rag
+  - id: owasp-asvs-v8
+    title: "OWASP ASVS 5.0 V8 Authorization"
+    url: https://raw.githubusercontent.com/OWASP/ASVS/master/5.0/en/0x17-V8-Authorization.md
+    type: markdown
+    collection: owasp-asvs-5.0
+    role: rag
+  - id: owasp-asvs-v9
+    title: "OWASP ASVS 5.0 V9 Self contained Tokens"
+    url: https://raw.githubusercontent.com/OWASP/ASVS/master/5.0/en/0x18-V9-Self-contained-Tokens.md
+    type: markdown
+    collection: owasp-asvs-5.0
+    role: rag
+  - id: owasp-asvs-v10
+    title: "OWASP ASVS 5.0 V10 OAuth and OIDC"
+    url: https://raw.githubusercontent.com/OWASP/ASVS/master/5.0/en/0x19-V10-OAuth-and-OIDC.md
+    type: markdown
+    collection: owasp-asvs-5.0
+    role: rag
+  - id: owasp-asvs-v11
+    title: "OWASP ASVS 5.0 V11 Cryptography"
+    url: https://raw.githubusercontent.com/OWASP/ASVS/master/5.0/en/0x20-V11-Cryptography.md
+    type: markdown
+    collection: owasp-asvs-5.0
+    role: rag
+  - id: owasp-asvs-v12
+    title: "OWASP ASVS 5.0 V12 Secure Communication"
+    url: https://raw.githubusercontent.com/OWASP/ASVS/master/5.0/en/0x21-V12-Secure-Communication.md
+    type: markdown
+    collection: owasp-asvs-5.0
+    role: rag
+  - id: owasp-asvs-v13
+    title: "OWASP ASVS 5.0 V13 Configuration"
+    url: https://raw.githubusercontent.com/OWASP/ASVS/master/5.0/en/0x22-V13-Configuration.md
+    type: markdown
+    collection: owasp-asvs-5.0
+    role: rag
+  - id: owasp-asvs-v14
+    title: "OWASP ASVS 5.0 V14 Data Protection"
+    url: https://raw.githubusercontent.com/OWASP/ASVS/master/5.0/en/0x23-V14-Data-Protection.md
+    type: markdown
+    collection: owasp-asvs-5.0
+    role: rag
+  - id: owasp-asvs-v15
+    title: "OWASP ASVS 5.0 V15 Secure Coding and Architecture"
+    url: https://raw.githubusercontent.com/OWASP/ASVS/master/5.0/en/0x24-V15-Secure-Coding-and-Architecture.md
+    type: markdown
+    collection: owasp-asvs-5.0
+    role: rag
+  - id: owasp-asvs-v16
+    title: "OWASP ASVS 5.0 V16 Security Logging and Error Handling"
+    url: https://raw.githubusercontent.com/OWASP/ASVS/master/5.0/en/0x25-V16-Security-Logging-and-Error-Handling.md
+    type: markdown
+    collection: owasp-asvs-5.0
+    role: rag
+
+  # ASVS ca tabel (toate cerintele cu ID si nivel) -> pentru cautarea dupa ID, nu pentru RAG
+  - id: owasp-asvs-requirements
+    title: "OWASP ASVS 5.0 requirements (CSV)"
+    url: https://raw.githubusercontent.com/OWASP/ASVS/master/5.0/docs_en/OWASP_Application_Security_Verification_Standard_5.0.0_en.csv
+    type: csv
+    collection: owasp-asvs-5.0
+    role: lookup
+
+  # --- NIST (autentificare si parole) ---
+  - id: nist-sp-800-63b-4
+    title: "NIST SP 800-63B-4 Digital Identity Guidelines: Authentication and Authenticator Management"
+    url: https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-63B-4.pdf
+    type: pdf
+    collection: nist
+    role: rag

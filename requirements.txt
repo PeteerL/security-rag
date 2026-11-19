@@ -1,0 +1,3 @@
+# Faza 0: descarcarea documentelor
+pyyaml>=6.0
+# Urmatoarele se adauga pe masura ce avansam (Faza 1: pymupdf, chromadb, sentence-transformers)
