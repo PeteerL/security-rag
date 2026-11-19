@@ -12,3 +12,6 @@ chroma/
 
 # Secrete
 .env
+
+# README temporar exclus (in lucru)
+README.md
