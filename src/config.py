@@ -1,0 +1,36 @@
+"""Setari comune pentru tot proiectul. Un singur loc in care schimbi o valoare."""
+
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+
+# Fisiere si foldere
+SOURCES_FILE = ROOT / "config" / "sources.yaml"
+RAW_DIR = ROOT / "data" / "raw"
+PROCESSED_DIR = ROOT / "data" / "processed"
+CHUNKS_FILE = PROCESSED_DIR / "chunks.jsonl"
+CHROMA_DIR = ROOT / "chroma"
+COLLECTION_NAME = "security_docs"
+
+# Chunking (masurat in cuvinte; un cuvant are in medie ~1.3 tokeni)
+MAX_WORDS = 300   # ~400 tokeni, sub limita de 512 tokeni a modelului de embeddings
+MIN_WORDS = 40    # bucatile mai mici se lipesc de urmatoarea din acelasi document
+MAX_MERGED_WORDS = 360  # limita cand lipim o bucata mica de urmatoarea (~470 tokeni)
+PDF_OVERLAP_WORDS = 40  # suprapunere intre bucatile din PDF (textul nu are titluri clare)
+
+# Sectiuni care nu ajuta la raspunsuri: liste de linkuri, statistici, mapari CWE
+SKIP_SECTIONS = (  # se potriveste orice titlu care CONTINE unul dintre aceste texte
+    "references",
+    "mapped cwes",
+    "score table",
+    "related cheat sheet",
+    "further reading",
+    "related articles",
+    "contributors",
+    "authors and primary editors",
+)
+
+# Embeddings: model local, gratuit, ruleaza pe procesor
+EMBEDDING_MODEL = "BAAI/bge-small-en-v1.5"
+# Modelele BGE cer acest prefix pentru intrebari (nu si pentru documente)
+QUERY_INSTRUCTION = "Represent this sentence for searching relevant passages: "
