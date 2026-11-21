@@ -90,35 +90,31 @@ Reguli:
 | 39 | When should a session ID be regenerated? | Session Management CS (Renew the Session ID After Any Privilege Level Change), ASVS V7.2.4 |
 | 40 | Which security headers should a REST API send in its responses? | REST Security CS (Security Headers) |
 
-## K. Întrebări FĂRĂ răspuns în documente (asistentul trebuie să refuze)
+## K. Cloud, Kubernetes și confidențialitate
+| # | Întrebare | Sursă așteptată |
+|---|---|---|
+| 41 | How do I configure a Kubernetes NetworkPolicy to isolate pods? | Docker Security CS (Rule #5: Kubernetes Network Policies) |
+| 42 | What fines can a company receive under GDPR for a data breach? | Top 10 A09:2025 (Scenario #3: amendă GDPR de 20 milioane de lire) |
+| 43 | How do I write AWS IAM policies that follow least privilege? | Secrets Management CS (politici IAM fine-grained pentru secrete), Authorization CS (Enforce Least Privileges) |
+
+## L. Întrebări FĂRĂ răspuns în documente (asistentul trebuie să refuze)
 Două tipuri: subiecte complet în afara corpusului și „aproape-ratări” (near-miss), care
 ating subiecte din documente fără ca documentele să răspundă la întrebare. Cele din urmă
 testează dacă asistentul inventează un răspuns pe baza unor fragmente doar asemănătoare.
 
-Verificat prin căutare în `data/raw` (fișierele .md și CSV-ul ASVS; PDF-ul NIST nu a putut
-fi căutat ca text). Coloana „Ce există în documente” spune ce ar putea încurca asistentul.
+Verificat prin căutare în tot `data/raw`: fișierele .md, CSV-ul ASVS și textul PDF-ului NIST
+(extras cu PyMuPDF; 0 apariții pentru termenii întrebărilor 44–53). Coloana „Ce există în
+documente” spune ce ar putea încurca asistentul.
 
 | # | Întrebare | Tip | Ce există în documente | Comportament așteptat |
 |---|---|---|---|---|
-| 41 | How do I configure Group Policy to harden Windows Server 2022? | în afara corpusului | nimic | „Nu am găsit în documente” |
-| 42 | Which antivirus product has the best detection rate? | near-miss | ASVS V5.4.3 și File Upload CS recomandă scanarea cu antivirus, fără produse | Refuz; poate menționa că documentele recomandă doar scanarea |
-| 43 | What is the CVSS score of CVE-2024-3094? | în afara corpusului | nimic | Mai târziu: unealta NVD. Acum: refuz |
-| 44 | How can I recover files encrypted by ransomware? | near-miss | Top 10 A09 are doar linkuri către ghiduri NIST despre ransomware | Refuz; poate indica referințele din A09 |
-| 45 | Which ports does Nmap scan by default? | în afara corpusului | nimic | „Nu am găsit în documente” |
-| 46 | How do I secure a home Wi-Fi network with WPA3? | în afara corpusului | Wi-Fi apare doar în treacăt (MFA CS, Session CS) | „Nu am găsit în documente” |
-| 47 | Does the npm package lodash 4.17.15 have known vulnerabilities? | în afara corpusului | nimic | Mai târziu: unealta NVD. Acum: refuz |
-| 48 | How can prompt injection be prevented in an LLM-based application? | near-miss | Top 10 A05 doar trimite la OWASP LLM Top 10 | Refuz; poate indica OWASP LLM Top 10 |
-| 49 | How do I configure SPF, DKIM and DMARC to prevent email spoofing? | în afara corpusului | nimic | „Nu am găsit în documente” |
-| 50 | How should a smart contract be audited for reentrancy vulnerabilities? | în afara corpusului | nimic | „Nu am găsit în documente” |
-
-Scoase după verificare (documentele conțin răspunsul, total sau parțial):
-- *How do I configure a Kubernetes NetworkPolicy to isolate pods?*: Docker Security CS (Rule #5) recomandă Kubernetes Network Policies.
-- *What fines can a company receive under GDPR for a data breach?*: Top 10 A09 (Scenario #3) dă exemplul unei amenzi GDPR de 20 milioane de lire.
-- *How do I write AWS IAM policies that follow least privilege?*: Secrets Management CS discută politici IAM fine-grained pentru secrete.
-
-## De făcut
-- [ ] Citește întrebările: ce lipsește din ce ai vrea să știe asistentul?
-- [x] Mai adaugă 5–10 întrebări (mai ales din experiența ta: ASP.NET, JWT, GraphQL).
-- [x] Ajungem la cel puțin 40 de întrebări cu răspuns + 10 fără răspuns.
-- [x] Verifică întrebările fără răspuns căutând în documente.
-- [ ] După Faza 1 (PyMuPDF): verifică și PDF-ul NIST pentru întrebările 41–50.
+| 44 | How do I configure Group Policy to harden Windows Server 2022? | în afara corpusului | nimic | „Nu am găsit în documente” |
+| 45 | Which antivirus product has the best detection rate? | near-miss | ASVS V5.4.3 și File Upload CS recomandă scanarea cu antivirus, fără produse | Refuz; poate menționa că documentele recomandă doar scanarea |
+| 46 | What is the CVSS score of CVE-2024-3094? | în afara corpusului | nimic | Mai târziu: unealta NVD. Acum: refuz |
+| 47 | How can I recover files encrypted by ransomware? | near-miss | Top 10 A09 are doar linkuri către ghiduri NIST despre ransomware | Refuz; poate indica referințele din A09 |
+| 48 | Which ports does Nmap scan by default? | în afara corpusului | nimic | „Nu am găsit în documente” |
+| 49 | How do I secure a home Wi-Fi network with WPA3? | în afara corpusului | Wi-Fi apare doar în treacăt (MFA CS, Session CS) | „Nu am găsit în documente” |
+| 50 | Does the npm package lodash 4.17.15 have known vulnerabilities? | în afara corpusului | nimic | Mai târziu: unealta NVD. Acum: refuz |
+| 51 | How can prompt injection be prevented in an LLM-based application? | near-miss | Top 10 A05 doar trimite la OWASP LLM Top 10 | Refuz; poate indica OWASP LLM Top 10 |
+| 52 | How do I configure SPF, DKIM and DMARC to prevent email spoofing? | în afara corpusului | nimic | „Nu am găsit în documente” |
+| 53 | How should a smart contract be audited for reentrancy vulnerabilities? | în afara corpusului | nimic | „Nu am găsit în documente” |
