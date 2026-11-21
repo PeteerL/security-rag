@@ -1,17 +1,33 @@
-# Medii virtuale si cache
+# Mediu virtual si cache Python
 .venv/
 venv/
 __pycache__/
 *.pyc
+.pytest_cache/
+.ipynb_checkpoints/
 
-# Date descarcate si generate (nu le urcam in repo)
+# Documentele descarcate si datele generate (se recreeaza cu scripturile)
 data/raw/*
 !data/raw/.gitkeep
 data/processed/
 chroma/
 
-# Secrete
+# Cache cu raspunsurile LLM-ului din timpul dezvoltarii
+cache/
+
+# Rezultatele brute ale evaluarilor (in README punem doar tabelul final)
+eval/results/
+
+# Secrete: cheile API nu ajung NICIODATA pe GitHub
 .env
 
-# README temporar exclus (in lucru)
+# Instructiuni locale pentru Claude Code (nu fac parte din proiect)
+CLAUDE.md
 README.md
+
+# Fisiere de editor si de sistem
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log

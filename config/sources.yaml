@@ -188,7 +188,7 @@ sources:
     collection: owasp-top10-2025
     role: rag
 
-  # --- OWASP ASVS 5.0 (capitolele V1-V16; V17 WebRTC e in afara temei) ---
+  # --- OWASP ASVS 5.0 (capitolele V1-V17; V17 WebRTC adaugat ca RAG sa acopere tot CSV-ul) ---
   - id: owasp-asvs-v1
     title: "OWASP ASVS 5.0 V1 Encoding and Sanitization"
     url: https://raw.githubusercontent.com/OWASP/ASVS/master/5.0/en/0x10-V1-Encoding-and-Sanitization.md
@@ -282,6 +282,12 @@ sources:
   - id: owasp-asvs-v16
     title: "OWASP ASVS 5.0 V16 Security Logging and Error Handling"
     url: https://raw.githubusercontent.com/OWASP/ASVS/master/5.0/en/0x25-V16-Security-Logging-and-Error-Handling.md
+    type: markdown
+    collection: owasp-asvs-5.0
+    role: rag
+  - id: owasp-asvs-v17
+    title: "OWASP ASVS 5.0 V17 WebRTC"
+    url: https://raw.githubusercontent.com/OWASP/ASVS/master/5.0/en/0x26-V17-WebRTC.md
     type: markdown
     collection: owasp-asvs-5.0
     role: rag
