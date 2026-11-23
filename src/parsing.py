@@ -4,8 +4,9 @@ Ideea de baza:
 - Markdown: taiem dupa titluri (#, ##, ###...). Fiecare bucata pastreaza "calea"
   titlurilor, de ex. "JSON Web Token Cheat Sheet > Token Sidejacking > Prevention",
   ca LLM-ul si utilizatorul sa stie exact de unde vine textul.
-- PDF: nu avem titluri marcate, asa ca taiem dupa dimensiune, cu suprapunere,
-  si pastram numarul paginii pentru citare.
+- PDF: titlurile le recunoastem dupa font (bold, la inceputul blocului, cu numerotare
+  ca "3.1.1.2." sau "B.1."), apoi taiem dupa dimensiune, cu suprapunere, si pastram
+  numarul paginii pentru citare. Scoatem antetele, subsolurile, cuprinsul si notele.
 """
 
 from __future__ import annotations
@@ -227,35 +228,132 @@ def merge_small_chunks(chunks: list[Chunk]) -> list[Chunk]:
 
 # --------------------------------------------------------------------------- PDF
 
-_SECTION_LINE = re.compile(r"^(\d+(?:\.\d+){0,3})\.?\s+([A-Z][^\n]{2,90})$")
 _PAGE_NUMBER = re.compile(r"^\s*(page\s*)?\d+\s*(of\s*\d+)?\s*$", re.IGNORECASE)
+_DOT_LEADER = re.compile(r"(?:\.\s?){5,}")  # randuri de cuprins: "2.4. General Requirements . . . . 9"
+_PDF_NUMBERED_HEADING = re.compile(
+    r"^(?:Appendix\s+(?P<appendix>[A-Z])|(?P<number>\d+(?:\.\d+)*|[A-Z](?:\.\d+)+))\.\s+(?P<title>\S.*)$")
+_BOLD = 16  # bitul pentru bold din span["flags"] (PyMuPDF)
+
+Part = tuple[str, bool, float]  # (text, e bold?, marimea fontului)
+
+
+def _block_parts(block: dict) -> list[Part]:
+    """Bucatile de text ale unui bloc PDF, cu fontul lor. Intre randuri punem un spatiu;
+    intre doua bucati de pe acelasi rand doar daca exista un gol vizibil intre ele."""
+    parts: list[Part] = []
+    for line in block.get("lines", []):
+        previous = None
+        for span in line["spans"]:
+            text = span["text"]
+            if (previous is None and parts) or (previous and span["bbox"][0] - previous["bbox"][2] > 1):
+                text = " " + text
+            parts.append((text, bool(span["flags"] & _BOLD), span["size"]))
+            previous = span
+    return parts
+
+
+def _join(parts: list[Part]) -> str:
+    return " ".join("".join(text for text, _, _ in parts).split())
+
+
+def _body_font_size(pages: list[list[dict]]) -> float:
+    """Marimea fontului textului obisnuit = cea mai folosita marime din document."""
+    sizes: Counter = Counter()
+    for blocks in pages:
+        for block in blocks:
+            for text, _, size in _block_parts(block):
+                sizes[round(size, 1)] += len(text.strip())
+    return sizes.most_common(1)[0][0] if sizes else 0.0
+
+
+def _is_footnote(parts: list[Part], body_size: float) -> bool:
+    """Nota de subsol: incepe cu un numar mic (exponent), urmat de text mai mic decat
+    textul obisnuit. Ex. in NIST: '2' (7.4pt) + 'Federal enterprise systems...' (10pt)."""
+    visible = [p for p in parts if p[0].strip()]
+    return (len(visible) > 1 and visible[0][0].strip().isdigit()
+            and visible[0][2] < body_size * 0.75
+            and max(size for _, _, size in visible[1:]) < body_size - 0.5)
+
+
+def _split_heading(parts: list[Part], body_size: float,
+                   outline: set[str] | None = None) -> tuple[str, str, str] | None:
+    """Daca blocul incepe cu un titlu, returneaza (cheie, titlu, restul textului).
+
+    Titlul = textul bold de la INCEPUTUL blocului, cel putin cat textul obisnuit, care:
+    - incepe cu o numerotare: "2.3.3. Reauthentication", "B.1. Introduction",
+      "Appendix B. Syncable Authenticators" (cheile: "2.3.3", "B.1", "B"), sau
+    - ocupa tot blocul, e scurt si n-are numerotare: "References" (cheia ""). Daca PDF-ul
+      are cuprins intern (outline), titlul trebuie sa apara si acolo; altfel celulele
+      bold din tabele ("Description Mitigations") ar fi luate drept titluri.
+    Textul bold din mijlocul unui paragraf sau urmat de text normal fara numerotare
+    (ex. "Authentication Assurance Level 1 ...") nu e titlu. Nici listele "1. ..."
+    (nu sunt bold) si nici capetele de tabel (font mai mic)."""
+    first_regular = next((i for i, p in enumerate(parts) if p[0].strip() and not p[1]), len(parts))
+    lead, rest = parts[:first_regular], parts[first_regular:]
+    lead_sizes = [size for text, _, size in lead if text.strip()]
+    if not lead_sizes or min(lead_sizes) < body_size - 0.5:
+        return None
+    lead_text, rest_text = _join(lead), _join(rest)
+    match = _PDF_NUMBERED_HEADING.match(lead_text)
+    if match and match["appendix"]:
+        return match["appendix"], f"Appendix {match['appendix']} {match['title']}", rest_text
+    if match:
+        return match["number"], f"{match['number']} {match['title']}", rest_text
+    if (not rest_text and len(lead_text.split()) <= config.PDF_MAX_UNNUMBERED_HEADING_WORDS
+            and (outline is None or lead_text.lower() in outline)):
+        return "", lead_text, ""
+    return None
 
 
 def parse_pdf(path: Path, source: dict) -> list[Chunk]:
     import pymupdf  # importat aici ca restul proiectului sa mearga si fara el
 
     with pymupdf.open(path) as pdf:
-        pages = [page.get_text("blocks") for page in pdf]
+        # "dict" da si fontul fiecarei bucati de text (de aici stim ce e bold)
+        pages = [[b for b in page.get_text("dict")["blocks"] if b.get("type", 0) == 0] for page in pdf]
+        toc = pdf.get_toc()  # cuprinsul intern: [nivel, titlu, pagina]; gol daca lipseste
+    body_size = _body_font_size(pages)
+    # Cu cuprins intern: titlurile fara numar trebuie sa fie in el, iar paginile dinaintea
+    # primei intrari (coperta, Authority, Abstract, cuprinsul tiparit) sunt preambul.
+    outline = {" ".join(title.lower().split()) for _, title, _ in toc} if toc else None
+    first_content_page = min(page for _, _, page in toc) if toc else 1
 
     # Antetele si subsolurile se repeta pe multe pagini: le gasim si le scoatem
-    def first_line(block) -> str:
-        return block[4].strip().splitlines()[0].strip() if block[4].strip() else ""
+    def first_line(block: dict) -> str:
+        lines = block.get("lines", [])
+        return _join(_block_parts({"lines": lines[:1]})) if lines else ""
 
     line_counts = Counter(first_line(b) for blocks in pages for b in blocks)
     repeated = {line for line, n in line_counts.items() if line and n >= max(3, len(pages) * 0.3)}
 
     paragraphs: list[tuple[int, str, str]] = []  # (pagina, sectiune, text)
-    section = source["title"]
+    numbered_titles: dict[str, str] = {}         # "3.1" -> "3.1 Requirements by Authenticator Type"
+    section_path = [source["title"]]
     for page_number, blocks in enumerate(pages, start=1):
+        if page_number < first_content_page:
+            continue
         for block in blocks:
-            text = " ".join(block[4].split())  # uneste randurile rupte
-            if not text or _PAGE_NUMBER.match(text) or first_line(block) in repeated:
+            parts = _block_parts(block)
+            text = _join(parts)
+            if (not text or _PAGE_NUMBER.match(text) or first_line(block) in repeated
+                    or _DOT_LEADER.search(text) or _is_footnote(parts, body_size)):
                 continue
-            match = _SECTION_LINE.match(text)
-            if match and len(text.split()) <= 12:
-                section = f"{match.group(1)} {match.group(2)}"
+            heading = _split_heading(parts, body_size, outline)
+            if heading:
+                key, title, text = heading
+                if key:  # calea se reface din numerotare: "3.1.1.2" -> 3 > 3.1 > 3.1.1 > 3.1.1.2
+                    numbered_titles[key] = title
+                    pieces = key.split(".")
+                    parents = [".".join(pieces[:i]) for i in range(1, len(pieces) + 1)]
+                    section_path = [numbered_titles[k] for k in parents if k in numbered_titles]
+                else:
+                    section_path = [title]
+            for phrase in config.PDF_SKIP_LINES:
+                text = re.sub(re.escape(phrase), " ", text, flags=re.IGNORECASE)
+            text = " ".join(text.split())
+            if not text or any(skip in t.lower() for t in section_path for skip in config.SKIP_SECTIONS):
                 continue
-            paragraphs.append((page_number, section, text))
+            paragraphs.append((page_number, " > ".join(section_path), text))
 
     # Impachetam paragrafele pe sectiuni, cu o mica suprapunere intre bucati
     chunks: list[Chunk] = []

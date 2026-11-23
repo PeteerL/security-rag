@@ -8,10 +8,12 @@ import hashlib
 import sys
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src import config  # noqa: E402
-from src.parsing import clean_markdown, pack_blocks, parse_markdown  # noqa: E402
+from src.parsing import clean_markdown, pack_blocks, parse_markdown, parse_pdf  # noqa: E402
 
 SOURCE = {"id": "test-doc", "title": "Test Cheat Sheet", "collection": "test", "url": "u", "type": "markdown"}
 
@@ -73,6 +75,97 @@ def test_short_intro_stays_with_list():
     big_list = "\n".join(f"* item number {i} " + "word " * 20 for i in range(30))
     first = pack_blocks([intro, big_list], config.MAX_WORDS)[0]
     assert first.startswith(intro) and "* item number 0" in first
+
+
+# ---------------------------------------------------------------- PDF (stil NIST)
+
+PDF_SOURCE = {"id": "test-pdf", "title": "Test PDF", "collection": "test", "url": "u", "type": "pdf"}
+BODY = "Verifiers SHALL compare every new password against a blocklist of common values."
+
+
+def make_pdf(path, toc=None):
+    """PDF mic care imita structura NIST: titluri bold numerotate lipite de paragraf,
+    liste, bold la inceput de paragraf, cuprins, tabel rupt, nota de subsol, anexe."""
+    pymupdf = pytest.importorskip("pymupdf")
+    doc = pymupdf.open()
+
+    def put(page, y, text, bold=False, size=12, x=72):
+        page.insert_text((x, y), text, fontname="hebo" if bold else "helv", fontsize=size)
+        return x + pymupdf.get_text_length(text, fontname="hebo" if bold else "helv", fontsize=size)
+
+    front = doc.new_page()                       # preambul
+    put(front, 72, "Authority", bold=True)
+    put(front, 110, "This publication has been developed by NIST under its statutory duties.")
+
+    page = doc.new_page()
+    put(page, 60, "2.4. General Requirements . . . . . . . . . . . . . . 9")   # rand de cuprins
+    put(page, 110, "2.3.3. Reauthentication", bold=True)                      # titlu + paragraf
+    put(page, 125, "Periodic reauthentication of subscriber sessions SHALL be performed.")
+    put(page, 140, BODY)
+    put(page, 190, "1. Verifiers SHALL require passwords of at least 15 characters.")  # lista
+    x = put(page, 240, "Authentication Assurance Level 1", bold=True)      # bold la inceput
+    put(page, 240, " provides some assurance that the claimant controls", x=x + 3)
+    put(page, 255, "an authenticator bound to the subscriber account.")
+    put(page, 300, "Continued on next page")                                # tabel rupt
+    put(page, 340, "Description Mitigations", bold=True)                    # cap de tabel
+    put(page, 380, "Leverage hardware security modules to protect the encrypted keys.")
+    put(page, 430, "Appendix B. Syncable Authenticators", bold=True)        # anexa
+    put(page, 445, BODY)
+    put(page, 490, "B.1. Introduction", bold=True)
+    put(page, 505, "Syncable authenticators can copy keys between devices of the same user.")
+    x = put(page, 700, "2", size=7)                                         # nota de subsol
+    put(page, 700, "Federal enterprise systems include government contractors.", size=10, x=x + 1)
+
+    thanks = doc.new_page()
+    put(thanks, 72, "Acknowledgments", bold=True)
+    put(thanks, 110, "The authors thank the many reviewers for their contributions.")
+
+    if toc:
+        doc.set_toc(toc)
+    doc.save(path)
+    return path
+
+
+def pdf_sections_and_text(chunks):
+    sections = " | ".join(c.section for c in chunks)
+    return sections, sections + " " + " ".join(c.text for c in chunks)
+
+
+def test_pdf_headings_detected_from_bold_font(tmp_path):
+    chunks = parse_pdf(make_pdf(tmp_path / "doc.pdf"), PDF_SOURCE)
+    sections, everything = pdf_sections_and_text(chunks)
+    text = " ".join(c.text for c in chunks)
+
+    assert "2.3.3 Reauthentication" in everything                     # titlu numerotat
+    assert "Periodic reauthentication of subscriber sessions" in text  # paragraful ramane
+    assert "2.3.3." not in text                                         # titlul nu e lipit in text
+    assert "Appendix B Syncable Authenticators > B.1 Introduction" in everything  # anexe + cale
+    # listele si textul bold de la inceputul unui paragraf NU sunt titluri
+    assert "1 Verifiers" not in sections and "Assurance Level 1" not in sections
+    assert "Authentication Assurance Level 1 provides some assurance" in text
+
+
+def test_pdf_noise_is_removed(tmp_path):
+    chunks = parse_pdf(make_pdf(tmp_path / "doc.pdf"), PDF_SOURCE)
+    text = " ".join(c.text for c in chunks)
+
+    assert ". . . . ." not in text and "General Requirements" not in text  # cuprinsul
+    assert "Continued on next page" not in text                             # tabel rupt
+    assert "Federal enterprise systems" not in text                         # nota de subsol
+    assert "thank the many reviewers" not in text                           # Acknowledgments sarit
+
+
+def test_pdf_outline_filters_table_cells_and_front_matter(tmp_path):
+    # Cu cuprins intern: "Description Mitigations" (cap de tabel) nu mai e titlu, iar
+    # pagina dinaintea primei intrari din cuprins (preambulul) e sarita.
+    toc = [[1, "General Requirements", 2], [1, "Acknowledgments", 3]]
+    chunks = parse_pdf(make_pdf(tmp_path / "doc.pdf", toc=toc), PDF_SOURCE)
+    sections, everything = pdf_sections_and_text(chunks)
+
+    assert "Description Mitigations" not in sections
+    assert "[Description Mitigations]" not in everything
+    assert "statutory duties" not in everything                             # preambul sarit
+    assert "thank the many reviewers" not in everything                     # tot sarit
 
 
 def fake_vector(text, dim=16):

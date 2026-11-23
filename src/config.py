@@ -28,7 +28,19 @@ SKIP_SECTIONS = (  # se potriveste orice titlu care CONTINE unul dintre aceste t
     "related articles",
     "contributors",
     "authors and primary editors",
+    # sectiuni din preambulul documentelor NIST (fara continut util pentru raspunsuri)
+    "acknowledg",          # Acknowledgments / Acknowledgements
+    "note to reviewers",
+    "disclaimer",
+    "abstract",
+    "keywords",
 )
+
+# PDF: randuri adaugate de tabelele rupte intre pagini (se scot din text)
+PDF_SKIP_LINES = ("continued on next page", "continued from previous page")
+# PDF: un bloc scurt, tot bold, fara numerotare (ex. "Acknowledgments") e titlu doar
+# daca are cel mult atatea cuvinte
+PDF_MAX_UNNUMBERED_HEADING_WORDS = 10
 
 # Embeddings: model local, gratuit, ruleaza pe procesor
 EMBEDDING_MODEL = "BAAI/bge-small-en-v1.5"
