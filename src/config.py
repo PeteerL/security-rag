@@ -12,10 +12,15 @@ CHUNKS_FILE = PROCESSED_DIR / "chunks.jsonl"
 CHROMA_DIR = ROOT / "chroma"
 COLLECTION_NAME = "security_docs"
 
-# Chunking (masurat in cuvinte; un cuvant are in medie ~1.3 tokeni)
-MAX_WORDS = 300   # ~400 tokeni, sub limita de 512 tokeni a modelului de embeddings
+# Chunking (masurat in cuvinte). Masurat pe corpus cu tokenizer-ul BGE: ~1.56 tokeni pe
+# cuvant la mediana, dar pana la ~5 la cod (ex. HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+MAX_WORDS = 300   # ~470 tokeni la mediana
 MIN_WORDS = 40    # bucatile mai mici se lipesc de urmatoarea din acelasi document
-MAX_MERGED_WORDS = 360  # limita cand lipim o bucata mica de urmatoarea (~470 tokeni)
+MAX_MERGED_WORDS = 360  # limita cand lipim o bucata mica de urmatoarea
+# Limita modelului de embeddings (max_seq_length). Textul de peste ea e taiat FARA
+# avertisment, asa ca dupa chunking impartim bucatile mai lungi (vezi enforce_token_limit).
+# Se numara tot textul care devine vector: titlu > sectiune + text + tokenii [CLS]/[SEP].
+MAX_TOKENS = 512
 PDF_OVERLAP_WORDS = 40  # suprapunere intre bucatile din PDF (textul nu are titluri clare)
 
 # Sectiuni care nu ajuta la raspunsuri: liste de linkuri, statistici, mapari CWE

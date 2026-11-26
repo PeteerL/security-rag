@@ -13,7 +13,8 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src import config  # noqa: E402
-from src.parsing import clean_markdown, pack_blocks, parse_markdown, parse_pdf  # noqa: E402
+from src.parsing import (  # noqa: E402
+    Chunk, clean_markdown, enforce_token_limit, pack_blocks, parse_document, parse_markdown, parse_pdf)
 
 SOURCE = {"id": "test-doc", "title": "Test Cheat Sheet", "collection": "test", "url": "u", "type": "markdown"}
 
@@ -166,6 +167,49 @@ def test_pdf_outline_filters_table_cells_and_front_matter(tmp_path):
     assert "[Description Mitigations]" not in everything
     assert "statutory duties" not in everything                             # preambul sarit
     assert "thank the many reviewers" not in everything                     # tot sarit
+
+
+# ------------------------------------------------------------ limita de tokeni
+
+def fake_token_count(text):
+    """Tokenizer fals: 1 cuvant = 3 tokeni (ca la cod), ca sa fortam impartirea fara model."""
+    return 3 * len(text.split())
+
+
+def make_chunk(text, page=None):
+    return Chunk("doc", "Doc", "test", "u", "Sec > Sub", text, page)
+
+
+def test_token_limit_splits_only_long_chunks():
+    short = make_chunk("Short text that fits easily. " * 5)
+    # paragrafe de lungimi diferite: jumatatea in cuvinte NU cade intamplator intre paragrafe
+    long_text = "\n\n".join(f"Paragraph {i}: " + "token " * (20 + 7 * i) for i in range(8))
+    long = make_chunk(long_text, page=7)
+
+    out = enforce_token_limit([short, long], fake_token_count, max_tokens=300)
+
+    assert out[0] is short                                                  # neatinsa
+    assert len(out) > 2                                                     # cea lunga s-a impartit
+    assert all(fake_token_count(c.embedding_text()) <= 300 for c in out)    # toate incap
+    assert " ".join(c.text for c in out[1:]).split() == long_text.split()   # nu se pierde nimic
+    assert all(c.section == "Sec > Sub" and c.page == 7 for c in out[1:])   # metadate pastrate
+    assert all(p.startswith("Paragraph") for c in out[1:] for p in c.text.split("\n\n"))  # taiat intre paragrafe
+
+
+def test_token_limit_handles_text_without_paragraphs():
+    # cod lung pe un singur rand: singura taietura posibila e intre cuvinte
+    code = " ".join(f"call_{i}()" for i in range(400))
+    out = enforce_token_limit([make_chunk(code)], fake_token_count, max_tokens=200)
+    assert all(fake_token_count(c.embedding_text()) <= 200 for c in out)
+    assert " ".join(c.text for c in out).split() == code.split()
+
+
+def test_parse_document_ids_stay_unique_after_split(tmp_path):
+    text = "# Doc\n\n## Long section\n\n" + "\n\n".join("sentence " * 50 for _ in range(6))
+    chunks = parse_document(write(tmp_path, text), SOURCE, count_tokens=fake_token_count)
+    ids = [c.chunk_id for c in chunks]
+    assert len(ids) == len(set(ids)) and ids[0] == "test-doc::000"
+    assert all(fake_token_count(c.embedding_text()) <= config.MAX_TOKENS for c in chunks)
 
 
 def fake_vector(text, dim=16):

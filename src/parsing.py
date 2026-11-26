@@ -380,15 +380,65 @@ def parse_pdf(path: Path, source: dict) -> list[Chunk]:
     return merge_small_chunks(chunks)
 
 
+# ------------------------------------------------------------------ limita tokeni
+
+def _halve(text: str) -> list[str] | None:
+    """Imparte textul in doua parti cat mai egale (in cuvinte), taind de preferinta intre
+    paragrafe, apoi intre randuri, intre propozitii si abia la urma intre cuvinte.
+    Un punct de taiere e acceptat doar daca fiecare parte are macar un sfert din cuvinte."""
+    total = len(text.split())
+    if total < 2:
+        return None
+    for separator in ("\n\n", "\n", ". ", " "):
+        units = text.split(separator)
+        if len(units) < 2:
+            continue
+        sizes = [len(u.split()) for u in units]
+        cuts = [(abs(sum(sizes[:i]) - total / 2), i) for i in range(1, len(units))]
+        _, i = min(cuts)
+        left_words = sum(sizes[:i])
+        if separator != " " and min(left_words, total - left_words) < total / 4:
+            continue  # taietura prea dezechilibrata: incercam un separator mai fin
+        left = separator.join(units[:i]) + (separator.rstrip() if separator == ". " else "")
+        right = separator.join(units[i:])
+        if left.strip() and right.strip():
+            return [left.strip(), right.strip()]
+    return None
+
+
+def enforce_token_limit(chunks: list[Chunk], count_tokens,
+                        max_tokens: int = config.MAX_TOKENS) -> list[Chunk]:
+    """Modelul de embeddings vede doar primii max_tokens tokeni din embedding_text();
+    restul e taiat fara avertisment. O bucata prea lunga (de obicei una cu cod) se imparte
+    in doua, apoi din nou, pana incape. Bucatile care incap raman neschimbate.
+
+    count_tokens: functie text -> numar de tokeni (in ingest: tokenizer-ul modelului)."""
+    result: list[Chunk] = []
+    pending = list(reversed(chunks))
+    while pending:
+        chunk = pending.pop()
+        halves = _halve(chunk.text) if count_tokens(chunk.embedding_text()) > max_tokens else None
+        if not halves:
+            result.append(chunk)  # incape (sau e un singur cuvant, nu mai avem ce taia)
+            continue
+        for text in reversed(halves):  # verificam din nou fiecare jumatate, in ordine
+            pending.append(Chunk(chunk.doc_id, chunk.doc_title, chunk.collection, chunk.url,
+                                 chunk.section, text, chunk.page))
+    return result
+
+
 # ----------------------------------------------------------------------- general
 
-def parse_document(path: Path, source: dict) -> list[Chunk]:
+def parse_document(path: Path, source: dict, count_tokens=None) -> list[Chunk]:
+    """count_tokens (optional): daca e dat, bucatile peste config.MAX_TOKENS se impart."""
     if source["type"] == "markdown":
         chunks = parse_markdown(path, source)
     elif source["type"] == "pdf":
         chunks = parse_pdf(path, source)
     else:
         raise ValueError(f"Tip necunoscut pentru RAG: {source['type']}")
+    if count_tokens is not None:
+        chunks = enforce_token_limit(chunks, count_tokens)
     for i, chunk in enumerate(chunks):
         chunk.chunk_id = f"{source['id']}::{i:03d}"
     return chunks
